@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@source "../**/*.{js,ts,jsx,tsx}";
+
+@theme {
+  --color-brand: #0d9488;
+}

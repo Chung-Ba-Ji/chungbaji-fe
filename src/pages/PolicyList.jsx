@@ -102,22 +102,23 @@ const statusClass = {
     );
   };
 
-  // items 배열에서 필터링
-  // const filtered = useMemo(() => {
-  //   const q = search.trim();
-  //   return (POLICIES.items || []).filter((p) =>
-  //     (subject === "전체" || p.category === subject) &&
-  //     (!q || p.title.includes(q))
-  //   );
-  // }, [search, subject, POLICIES.items]);
 
-  const filtered = useMemo(() => {
+// filter
+const filtered = useMemo(() => {
   const q = search.trim();
-  return (POLICIES.items || []).filter((p) =>
-    (filters.subject === "전체" || p.category === filters.category) &&
-    (!q || p.title.includes(q))
-  );
-}, [search, filters.category, POLICIES.items]);
+
+  return (POLICIES.items || []).filter((p) => {
+    const passCategory =
+      categories.length === 0 ||
+      categories.includes("전체") ||
+      categories.includes(p.category);
+
+    const passSearch = !q || p.title.includes(q);
+
+    return passCategory && passSearch;
+  });
+}, [search, categories]);
+
 
 
   
@@ -236,6 +237,7 @@ const statusClass = {
                 <li>
                   <input className="ageDate-input"
                     type="input"
+                    placeholder="2000.01.01"
                   />
                 </li>
             </ul>

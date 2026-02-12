@@ -1,28 +1,34 @@
 import React, { useState } from 'react';
-import { MessageSquare, ThumbsUp, Eye, User, Plus, Search } from 'lucide-react';
-import { motion as Motion } from 'framer-motion';
+import PostList from '../components/community/PostList';
+import PostDetail from '../components/community/PostDetail';
+import PostForm from '../components/community/PostForm';
+import { toast } from 'sonner';
 
-const POSTS = [
-  {
-    id: 1,
-    category: '주거',
-    title: '청년 월세 지원 대상자 선정됐어요! 후기 남깁니다',
-    author: '서울청년88',
-    content: '서류 준비하는게 생각보다 까다로웠는데...',
-    likes: 24,
-    comments: 12,
-    views: 156,
-    time: '2시간 전'
-  }
-];
+const Community = ({ user }) => {
+  const [view, setView] = useState('list'); // 'list', 'detail', 'write'
+  const [selectedPostId, setSelectedPostId] = useState(null);
 
-const Community = () => {
+  const handlePostClick = (postId) => {
+    setSelectedPostId(postId);
+    setView('detail');
+  };
+
+  const handleBackToList = () => {
+    setSelectedPostId(null);
+    setView('list');
+  };
+
+  const handleWriteSuccess = () => {
+    setView('list');
+    toast.success('게시글이 등록되었습니다.');
+  };
+
   return (
     <section className="py-8 bg-slate-50/50 min-h-screen px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-slate-800">청년 커뮤니티</h2>
-          <button className="bg-teal-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+          <button className="bg-blue-primary text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
             <Plus size={20} /> 글쓰기
           </button>
         </div>
@@ -45,6 +51,36 @@ const Community = () => {
             </div>
           ))}
         </div>
+
+        {view === 'list' && (
+          <div className="animate-in fade-in duration-300">
+            <PostList
+              onViewChange={setView}
+              onPostClick={handlePostClick}
+              user={user}
+            />
+          </div>
+        )}
+
+        {view === 'detail' && (
+          <div className="animate-in slide-in-from-right-4 duration-300">
+            <PostDetail
+              postId={selectedPostId}
+              onBack={handleBackToList}
+              user={user}
+            />
+          </div>
+        )}
+
+        {view === 'write' && (
+          <div className="animate-in slide-in-from-bottom-4 duration-300">
+            <PostForm
+              onCancel={() => setView('list')}
+              onSuccess={handleWriteSuccess}
+              user={user}
+            />
+          </div>
+        )}
       </div>
     </section>
   );

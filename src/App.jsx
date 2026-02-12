@@ -1,72 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Navbar from './components/common/Navbar';
-import Hero from './components/common/Hero'; 
+import Hero from './components/common/Hero';
 import PolicyList from './pages/PolicyList';
 import Community from './pages/Community';
 import CalendarView from './pages/Calendar';
 import Auth from './pages/Auth';
 import { Toaster, toast } from 'sonner';
-
-// Mock data for policies (should be kept in sync with PolicyList or imported)
-const POLICIES = [
-  {
-    id: 1,
-    title: "청년 월세 특별지원",
-    category: "주거",
-    region: "전국",
-    status: "접수중",
-    deadline: "2026-12-31",
-    description: "청년들의 주거비 부담 경감을 위해 월세를 최대 20만원까지 지원합니다.",
-    tags: ["월세지원", "무주택청년"]
-  },
-  {
-    id: 2,
-    title: "청년 일자리 도약 장려금",
-    category: "취업",
-    region: "서울",
-    status: "접수중",
-    deadline: "2026-06-30",
-    description: "취업에 어려움을 겪는 청년을 채용한 중소기업에 장려금을 지원합니다.",
-    tags: ["중소기업", "취업장려"]
-  },
-  {
-    id: 3,
-    title: "경기도 청년 기본소득",
-    category: "복지",
-    region: "경기",
-    status: "마감임박",
-    deadline: "2026-03-15",
-    description: "경기도에 거주하는 만 24세 청년에게 분기별 25만원을 지급합니다.",
-    tags: ["기본소득", "경기도민"]
-  },
-  {
-    id: 4,
-    title: "희망두배 청년통장",
-    category: "금융",
-    region: "서울",
-    status: "공고중",
-    deadline: "2026-05-10",
-    description: "참가자가 매월 저축하는 금액과 동일한 금액을 서울시가 적립해줍니다.",
-    tags: ["자산형성", "저축"]
-  },
-  {
-    id: 5,
-    title: "청년 창업 지원 사업",
-    category: "창업",
-    region: "전국",
-    status: "접수중",
-    deadline: "2026-04-20",
-    description: "혁신적인 아이디어를 가진 청년 창업가에게 사업화 자금을 지원합니다.",
-    tags: ["스타트업", "사업비지원"]
-  }
-];
+import api from './api/axios';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState('login');
-  const [bookmarks, setBookmarks] = useState([1, 3]); // Initial mock bookmarks
+
+  const [schedules, setSchedules] = useState([]); // 일정 데이터 
 
   const handleLoginClick = () => {
     setAuthMode('login');
@@ -79,34 +27,102 @@ export default function App() {
     toast.success(`${userData.name}님, 환영합니다!`);
   };
 
-  const toggleBookmark = (id) => {
+  // schedules 기반으로 bookmarks(policyId 배열) 파생
+  const bookmarks = useMemo(() => {
+    return (schedules || [])
+      .filter(s => s.status === 'ACTIVE')
+      .map(s => Number(s.policyId));
+  }, [schedules]);
+
+
+  // 일정 조회 (북마크 표시 포함)
+  const fetchSchedules = useCallback(async () => {
     if (!user) {
-      toast.error('북마크 기능을 사용하려면 먼저 로그인해주세요.');
+      setSchedules([]);
+      return;
+    }
+
+    try {
+      const response = await api.get('/api/schedule/list');
+      setSchedules(response.data || []);
+    } catch (error) {
+      console.error('>>>>> 데이터 로드 실패:', error);
+      setSchedules([]);
+    }
+  }, [user]);
+
+  // 유저 변경 시 schedules 재조회
+  useEffect(() => {
+    fetchSchedules();
+  }, [fetchSchedules]);
+
+  const toggleBookmark = async (policyId) => {
+    if (!user) {
+      toast.error('로그인이 필요합니다.');
       handleLoginClick();
       return;
     }
 
-    setBookmarks(prev => {
-      if (prev.includes(id)) {
-        toast.info('북마크에서 제거되었습니다.');
-        return prev.filter(bId => bId !== id);
+    // 현재 schedules 기준으로 ACTIVE인지 판단
+    const isBookmarked = schedules.some(
+      (s) => s.policyId === policyId && s.status === 'ACTIVE'
+    );
+
+    // Optimistic UI (서버 응답 늦을 때도 즉시 반영)
+    // - 스케줄 구조를 정확히 모르니, 최소한으로 "ACTIVE 유무만" 임시 반영
+    // - 실패 시 fetchSchedules로 되돌리면 됨
+    setSchedules((prev) => {
+      const list = prev || [];
+
+      if (isBookmarked) {
+        // ACTIVE -> 제거(또는 INACTIVE로 바꿈)
+        return list.map((s) =>
+          s.policyId === policyId && s.status === 'ACTIVE'
+            ? { ...s, status: 'INACTIVE' }
+            : s
+        );
       } else {
-        toast.success('북마크에 추가되었습니다. 달력에서 확인해보세요!');
-        return [...prev, id];
+        // 없다면 임시 ACTIVE 하나 추가
+        return [...list, { policyId, status: 'ACTIVE' }];
       }
     });
+
+    try {
+      if (isBookmarked) {
+        // DELETE /api/bookmarks/delete  (body 필요)
+        await api.delete('/api/bookmarks/delete', {
+          data: { policyId },
+        });
+        toast.info('북마크에서 제거되었습니다.');
+      } else {
+        // POST /api/bookmarks/register
+        await api.post('/api/bookmarks/register', { policyId });
+        toast.success('북마크에 추가되었습니다!');
+      }
+
+      // 서버 상태로 최종 동기화 
+      await fetchSchedules();
+    } catch (error) {
+      console.error('처리 실패:', error);
+      toast.error('북마크 처리에 실패했습니다.');
+
+      // 실패 시 서버 상태로 복구
+      await fetchSchedules();
+    }
   };
 
-  const bookmarkedPolicies = POLICIES.filter(p => bookmarks.includes(p.id));
+  // 캘린더에 넘길 데이터 
+  const bookmarkedPolicies = schedules;
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-teal-100 selection:text-teal-900">
-      <Navbar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         user={user}
         onLoginClick={handleLoginClick}
       />
+
 
       <main className="pt-16">
         {activeTab === 'home' && (
@@ -120,7 +136,7 @@ export default function App() {
 
         {activeTab === 'policies' && (
           <div className="animate-in fade-in duration-500">
-             <PolicyList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
+            <PolicyList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
           </div>
         )}
 
@@ -137,16 +153,15 @@ export default function App() {
         )}
       </main>
 
-      {/* Auth Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={() => setShowAuthModal(false)}
           ></div>
           <div className="relative z-10 w-full max-w-md animate-in zoom-in-95 duration-200">
-            <Auth 
-              mode={authMode} 
+            <Auth
+              mode={authMode}
               onToggleMode={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
               onLoginSuccess={handleLoginSuccess}
             />
@@ -155,31 +170,53 @@ export default function App() {
       )}
 
       <Toaster position="top-center" />
-      
-      {/* Footer */}
+
       <footer className="bg-slate-900 text-slate-400 py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-1 md:col-span-1">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-primary rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">Y</span>
                 </div>
-                <span className="text-xl font-bold text-white">YouthHub</span>
+                <span className="text-xl font-bold text-white">청바지</span>
               </div>
               <p className="text-sm leading-relaxed">
                 대한민국 모든 청년들의 <br />
                 내일을 응원하는 정책 플랫폼입니다.
               </p>
             </div>
+
             <div>
               <h4 className="text-white font-bold mb-6">서비스</h4>
               <ul className="space-y-4 text-sm">
-                <li><button onClick={() => setActiveTab('policies')} className="hover:text-teal-400 transition-colors">정책 찾기</button></li>
-                <li><button onClick={() => setActiveTab('community')} className="hover:text-teal-400 transition-colors">커뮤니티</button></li>
-                <li><button onClick={() => setActiveTab('calendar')} className="hover:text-teal-400 transition-colors">내 일정 관리</button></li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab('policies')}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    정책 찾기
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab('community')}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    커뮤니티
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setActiveTab('calendar')}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    내 일정 관리
+                  </button>
+                </li>
               </ul>
             </div>
+
             <div>
               <h4 className="text-white font-bold mb-6">고객지원</h4>
               <ul className="space-y-4 text-sm">
@@ -188,6 +225,7 @@ export default function App() {
                 <li>문의하기</li>
               </ul>
             </div>
+
             <div>
               <h4 className="text-white font-bold mb-6">정보</h4>
               <ul className="space-y-4 text-sm">
@@ -197,11 +235,13 @@ export default function App() {
               </ul>
             </div>
           </div>
+
           <div className="pt-8 border-t border-slate-800 text-center text-xs">
-            <p>© 2026 YouthHub. All rights reserved.</p>
+            <p>© 2026 chungbaji. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

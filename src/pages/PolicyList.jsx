@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Search, Bookmark, ChevronRight, MapPin, Calendar } from "lucide-react";
 import { motion as Motion } from 'framer-motion';
 import styled from "styled-components";
@@ -7,7 +7,7 @@ import styled from "styled-components";
    PolicyList (CSS-in-JSX Single File)
 ============================== */
 
-export default function PolicyList() {
+export default function PolicyList({ bookmarks = [], toggleBookmark }) {
   const [search, setSearch] = useState("");
   const [subject, setSubject] = useState("전체");
   // const [bookmarks, setBookmarks] = useState([]);
@@ -37,35 +37,38 @@ export default function PolicyList() {
     "total": 123
   }
 
-const statusClass = {
-  "접수중": "status-open",
-  "마감임박": "status-soon",
-  "마감": "status-close"
-};
-
-  // 북마크 상태: JSON의 isBookmarked를 초기값으로 세팅
-  const [bookmarks, setBookmarks] = useState(
-    (POLICIES.items || []).filter((p) => p.isBookmarked).map((p) => p.policyId)
-  );
-
-  const toggleBookmark = (policyId) => {
-    setBookmarks((prev) =>
-      prev.includes(policyId)
-        ? prev.filter((x) => x !== policyId)
-        : [...prev, policyId]
-    );
+  const statusClass = {
+    "접수중": "status-open",
+    "마감임박": "status-soon",
+    "마감": "status-close"
   };
 
-  // items 배열에서 필터링
-  const filtered = useMemo(() => {
-    const q = search.trim();
-    return (POLICIES.items || []).filter((p) =>
-      (subject === "전체" || p.category === subject) &&
-      (!q || p.title.includes(q))
-    );
-  }, [search, subject, POLICIES.items]);
 
-  
+
+
+  // // 북마크 상태: JSON의 isBookmarked를 초기값으로 세팅
+  // const [bookmarks, setBookmarks] = useState(
+  //   (POLICIES.items || []).filter((p) => p.isBookmarked).map((p) => p.policyId)
+  // );
+
+  // const toggleBookmark = (policyId) => {
+  //   setBookmarks((prev) =>
+  //     prev.includes(policyId)
+  //       ? prev.filter((x) => x !== policyId)
+  //       : [...prev, policyId]
+  //   );
+  // };
+
+  // // items 배열에서 필터링
+  // const filtered = useMemo(() => {
+  //   const q = search.trim();
+  //   return (POLICIES.items || []).filter((p) =>
+  //     (subject === "전체" || p.category === subject) &&
+  //     (!q || p.title.includes(q))
+  //   );
+  // }, [search, subject, POLICIES.items]);
+
+
 
   // 접수 상태 뱃지(예: isOpen 기반)
   const getStatusLabel = (p) => (p.isOpen ? "접수중" : "마감");
@@ -82,6 +85,7 @@ const statusClass = {
     income: true,
     special: true,
   });
+
   // 필터 상태 (예시)
   const [filters, setFilters] = useState({
     subject: "전체",
@@ -95,7 +99,12 @@ const statusClass = {
     special: "",
   });
 
+  useEffect(() => {
+    setSubject(filters.subject);
+  }, [filters.subject]);
+
   const toggle = (key) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+
   const sectionTitle = (title, key) => (
     <button type="button" className="sectionHead" onClick={() => toggle(key)}>
       <span className="sectionTitle">{title}</span>
@@ -128,7 +137,18 @@ const statusClass = {
       income: true,
       special: true,
     });
+    setSearch("");
+    setSubject("전체");
   };
+
+  const filtered = useMemo(() => {
+    const q = search.trim();
+    return (POLICIES.items || []).filter(
+      (p) =>
+        (subject === "전체" || p.category === subject) &&
+        (!q || (p.title || "").includes(q))
+    );
+  }, [search, subject, POLICIES.items]);
 
 
   return (
@@ -137,7 +157,6 @@ const statusClass = {
         <h1>나에게 맞는 정책 찾기</h1>
         <p className="sub">현재 {POLICIES.total}개의 정책이 등록되어 있습니다.</p>
 
-        {/* 검색 */}
         <div className="search-wrap">
           <div className="search-box">
             <Search size={18} className="search-icon" />
@@ -150,85 +169,78 @@ const statusClass = {
         </div>
 
         <div className="layout">
-          {/* 사이드바 */}
           <aside className="sidebar">
             <div className="sidebar-title">
               <h2>검색필터</h2>
-              <p>초기화</p>
+              <p onClick={reset}>초기화</p>
             </div>
-      
-            {/* <h3>주제</h3>
-            {["전체", "주거", "취업", "금융", "복지", "교육", "창업"].map(cat => (
-              <button
-                key={cat}
-                className={subject === cat ? "active" : ""}
-                onClick={() => setSubject(cat)}
-              >
-                {cat}
-              </button>
-            ))} */}
-            {/* 주제 */}
-          <div className="section">
-            {sectionTitle("주제", "subject")}
-            <div className={`content ${open.subject ? "" : "hidden"}`}>
-              <div className="list">
-                {SUBJECTS.map((s) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    className={`rowBtn ${filters.subject === s.label ? "active" : ""}`}
-                    onClick={() => setFilters((p) => ({ ...p, subject: s.label }))}
-                  >
-                    <span className="icon">{s.icon}</span>
-                    <span>{s.label}</span>
-                  </button>
-                ))}
+
+            <div className="section">
+              {sectionTitle("주제", "subject")}
+              <div className={`content ${open.subject ? "" : "hidden"}`}>
+                <div className="list">
+                  {SUBJECTS.map((s) => (
+                    <button
+                      key={s.label}
+                      type="button"
+                      className={`rowBtn ${filters.subject === s.label ? "active" : ""}`}
+                      onClick={() => setFilters((p) => ({ ...p, subject: s.label }))}
+                    >
+                      <span className="icon">{s.icon}</span>
+                      <span>{s.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
           </aside>
 
-          {/* 카드 영역 */}
           <section className="cards">
-            {filtered.map(p => (
-              <Motion.div>
-                <div key={p.id} className="card">
-                  <div>
-                    <div className="card-top">
-                      {/* 접수중 */}
-                      {/* <span className="status tag-status">{p.status}</span>  */}
-                      <span className={`status tag-status ${statusClass[p.status]}`}>{p.status}</span>
-                      {/* 주거, 취업, ... */}
-                      <span className="category tag-catList">{p.category}</span>
-                      <button
-                        className={`bookmark ${bookmarks.includes(p.policyId) ? "active" : ""}`}
-                        onClick={() => toggleBookmark(p.policyId)}
-                      >
-                        <Bookmark
-                          size={18}
-                          fill={bookmarks.includes(p.policyId) ? "currentColor" : "none"}
-                        />
+            {filtered.map((p) => {
+              const status = getStatusLabel(p);
+              const isBookmarked = bookmarks.includes(p.policyId);
+
+              return (
+                <Motion.div key={p.policyId}>
+                  <div className="card">
+                    <div>
+                      <div className="card-top">
+                        <span className={`status tag-status ${statusClass[status] || ""}`}>
+                          {status}
+                        </span>
+                        <span className="category tag-catList">{p.category}</span>
+
+                        <button
+                          type="button"
+                          className={`bookmark ${isBookmarked ? "active" : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleBookmark?.(p.policyId); 
+                          }}
+                        >
+                          <Bookmark size={18} fill={isBookmarked ? "currentColor" : "none"} />
+                        </button>
+                      </div>
+
+                      <div className="card-title">{p.title}</div>
+                      <div className="desc">{p.description}</div>
+                    </div>
+
+                    <div className="meta">
+                      <div>
+                        <MapPin size={12} /> {p.regionName}
+                      </div>
+                      <div>
+                        <Calendar size={12} /> {p.applyEndDate}
+                      </div>
+                      <button className="detail-btn" type="button">
+                        자세히 보기 <ChevronRight size={14} />
                       </button>
                     </div>
-
-                    <div className="card-title">{p.title}</div>
-                    <div className="desc">{p.description}</div>
                   </div>
-
-                  <div className="meta">
-                    <div>
-                      <MapPin size={12} /> {p.regionName}
-                    </div>
-                    <div>
-                      <Calendar size={12} /> {p.applyEndDate}
-                    </div>
-                    <button className="detail-btn">
-                      자세히 보기 <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              </Motion.div>
-            ))}
+                </Motion.div>
+              );
+            })}
           </section>
         </div>
       </div>

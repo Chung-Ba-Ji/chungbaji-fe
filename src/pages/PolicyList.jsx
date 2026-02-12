@@ -209,67 +209,63 @@ const statusClass = {
 
             {/* 지역 */}
             <button className="toggle-btn" onClick={() => toggleSection("regionName")}>지역<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
-              {["항목 1", "항목 2", "항목 3"].map((item) => (
-              <li key = {item}>
+            <ul id="myList" className={`list ${open.regionName ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((r) => (
+              <li key = {r}>
                 <label>
                   <input
                     type="checkbox"
-                    checked={subjects.includes(item)}
+                    checked={subjects.includes(r)}
                     onChange={() =>
                       setSubjects((prev) =>
-                        prev.includes(item)
-                          ? prev.filter((v) => v !== item)
-                          : [...prev, item]
+                        prev.includes(r)
+                          ? prev.filter((v) => v !== r)
+                          : [...prev, r]
                       )
                     }
                   />
-                  {item}
+                  {r}
                 </label>
               </li>
               ))}
             </ul>
 
             {/* 연령대 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>연령대<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
-              <li >
-                <label>
-                  <input
+            <button className="toggle-btn" onClick={() => toggleSection("ageDate")}>연령대<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.ageDate ? "" : "hidden"}`}>
+                <li>
+                  <input className="ageDate-input"
                     type="input"
-             
                   />
-              
-                </label>
-              </li>
+                </li>
             </ul>
 
             {/* 성별 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>성별<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
-              {["남", "여"].map((item) => (
-              <li key = {item}>
+            <button className="toggle-btn" onClick={() => toggleSection("gender")}>성별<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.gender ? "" : "hidden"}`}>
+              {["남", "여"].map((g) => (
+              <li key = {g}>
                 <label>
                   <input
                     type="checkbox"
-                    checked={subjects.includes(item)}
+                    checked={subjects.includes(g)}
                     onChange={() =>
                       setSubjects((prev) =>
-                        prev.includes(item)
-                          ? prev.filter((v) => v !== item)
-                          : [...prev, item]
+                        prev.includes(g)
+                          ? prev.filter((v) => v !== g)
+                          : [...prev, g]
                       )
                     }
                   />
-                  {item}
+                  {g}
                 </label>
               </li>
               ))}
             </ul>
 
             {/* 취업상태 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>취업상태<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+            <button className="toggle-btn" onClick={() => toggleSection("jobCd")}>취업상태<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.jobCd ? "" : "hidden"}`}>
               {["항목 1", "항목 2", "항목 3"].map((item) => (
               <li key = {item}>
                 <label>
@@ -291,8 +287,8 @@ const statusClass = {
             </ul>
 
             {/* 학력상태 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>학력상태<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+            <button className="toggle-btn" onClick={() => toggleSection("schoolCd")}>학력상태<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.schoolCd ? "" : "hidden"}`}>
               {["항목 1", "항목 2", "항목 3"].map((item) => (
               <li key = {item}>
                 <label>
@@ -314,8 +310,8 @@ const statusClass = {
             </ul>
 
             {/* 전공 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>전공<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+            <button className="toggle-btn" onClick={() => toggleSection("plcyMajorCd")}>전공<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.plcyMajorCd ? "" : "hidden"}`}>
               {["항목 1", "항목 2", "항목 3"].map((item) => (
               <li key = {item}>
                 <label>
@@ -337,8 +333,8 @@ const statusClass = {
             </ul>
 
             {/* 소득요건 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>소득요건<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+            <button className="toggle-btn" onClick={() => toggleSection("earnCndSeCd")}>소득요건<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.earnCndSeCd ? "" : "hidden"}`}>
               {["항목 1", "항목 2", "항목 3"].map((item) => (
               <li key = {item}>
                 <label>
@@ -360,8 +356,8 @@ const statusClass = {
             </ul>
 
             {/* 특화요건 */}
-            <button className="toggle-btn" onClick={() => toggleSection("subject")}>특화요건<ChevronDown size={16} /></button>
-            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+            <button className="toggle-btn" onClick={() => toggleSection("sbizCd")}>특화요건<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.sbizCd ? "" : "hidden"}`}>
               {["항목 1", "항목 2", "항목 3"].map((item) => (
               <li key = {item}>
                 <label>
@@ -512,6 +508,8 @@ const PolicyWrap = styled.div`
     }
     .toggle-btn{ width: 100%; display: flex; align-items: center; padding: 10px 20px; justify-content: space-between; font-size: 18px; font-weight: 700; color:var(--blue-800);  }
 
+    .list{ width: 100%; }
+    .list label{ max-width: 258px; box-sizing:border-box; }
     .list > li { padding: 10px 12px; cursor: pointer; margin:4px 8px; border-radius:8px;  }
     .list > li:hover { background-color: #F1F5F9;  }
     .list > li:active { background-color: #F1F5F9;  }
@@ -520,6 +518,7 @@ const PolicyWrap = styled.div`
     font-size:15px;
     margin-bottom:10px;
   }
+  .ageDate-input{ width:100%; padding: 10px 12px; border-radius:8px; font-size: 17px; border: 1px solid #e5eaf1; }
 
 
   /* 카드 리스트 */

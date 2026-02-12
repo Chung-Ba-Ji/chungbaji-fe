@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Search, Bookmark, ChevronRight, MapPin, Calendar } from "lucide-react";
+import { Search, Bookmark, ChevronDown, ChevronRight, MapPin, Calendar } from "lucide-react";
 import { motion as Motion } from 'framer-motion';
 import styled from "styled-components";
 
@@ -7,11 +7,23 @@ import styled from "styled-components";
    PolicyList (CSS-in-JSX Single File)
 ============================== */
 
+// 신청기간 구분 코드(0057) -> 라벨
+export const ApplyPeriodLabelByCode = {
+  "0057001": "특정기간",
+  "0057002": "상시",
+  "0057003": "마감",
+};
+
+
+
 export default function PolicyList() {
   const [search, setSearch] = useState("");
-  const [subject, setSubject] = useState("전체");
+  // const [subject, setSubject] = useState("전체");
+  const [subjects, setSubjects] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   // const [bookmarks, setBookmarks] = useState([]);
-  const SUBJECTS = [
+  const CATEGORY = [
     { label: "전체", icon: "" },
     { label: "주거", icon: "🏡" },
     { label: "취업", icon: "💼" },
@@ -32,10 +44,44 @@ export default function PolicyList() {
         "isOpen": true,
         "isBookmarked": true,
         "description": "청년들의 주거비 부담 경감을 위해 월세를 최대 20만원까지 지원합니다."
+      },
+      {
+        "policyId": 2,
+        "title": "청년 월세 특별지원",
+        "category": "취업",
+        "regionName": "전국",
+        "applyEndDate": "2026-12-31",
+        "isOpen": true,
+        "isBookmarked": true,
+        "description": "청년들의 주거비 부담 경감을 위해 월세를 최대 20만원까지 지원합니다."
       }
     ],
     "total": 123
   }
+
+  const [open, setOpen] = useState({
+    category: true,
+    regionName: true,
+    ageDate: true,
+    gender: true,
+    jobCd: true,
+    schoolCd: true,
+    plcyMajorCd: true,
+    earnCndSeCd: true,
+    sbizCd: true,
+  });
+  // 필터 상태 (예시)
+  const [filters, setFilters] = useState({
+    category: "전체", //주제(카테고리)
+    regionName: "전체", //지역
+    ageDate: "2026.01.01", // 연령대
+    gender: "", // 상별
+    jobCd: "", //취업상태
+    schoolCd: "", //힉력
+    plcyMajorCd: "", //전공
+    earnCndSeCd: "", //소득요건
+    sbizCd: "", //특화요건
+  });
 
 const statusClass = {
   "접수중": "status-open",
@@ -57,13 +103,22 @@ const statusClass = {
   };
 
   // items 배열에서 필터링
+  // const filtered = useMemo(() => {
+  //   const q = search.trim();
+  //   return (POLICIES.items || []).filter((p) =>
+  //     (subject === "전체" || p.category === subject) &&
+  //     (!q || p.title.includes(q))
+  //   );
+  // }, [search, subject, POLICIES.items]);
+
   const filtered = useMemo(() => {
-    const q = search.trim();
-    return (POLICIES.items || []).filter((p) =>
-      (subject === "전체" || p.category === subject) &&
-      (!q || p.title.includes(q))
-    );
-  }, [search, subject, POLICIES.items]);
+  const q = search.trim();
+  return (POLICIES.items || []).filter((p) =>
+    (filters.subject === "전체" || p.category === filters.category) &&
+    (!q || p.title.includes(q))
+  );
+}, [search, filters.category, POLICIES.items]);
+
 
   
 
@@ -71,64 +126,35 @@ const statusClass = {
   const getStatusLabel = (p) => (p.isOpen ? "접수중" : "마감");
 
 
-  const [open, setOpen] = useState({
-    subject: true,
-    region: true,
-    age: true,
-    gender: true,
-    job: true,
-    edu: true,
-    major: true,
-    income: true,
-    special: true,
-  });
-  // 필터 상태 (예시)
-  const [filters, setFilters] = useState({
-    subject: "전체",
-    region: "전체",
-    ageDate: "2026.01.01",
-    gender: "",
-    job: "",
-    edu: "",
-    major: "",
-    income: "",
-    special: "",
-  });
 
-  const toggle = (key) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
-  const sectionTitle = (title, key) => (
-    <button type="button" className="sectionHead" onClick={() => toggle(key)}>
-      <span className="sectionTitle">{title}</span>
-      <span className={`chev ${open[key] ? "on" : ""}`} aria-hidden="true">
-        ▾
-      </span>
-    </button>
-  );
 
-  const reset = () => {
-    setFilters({
-      subject: "전체",
-      region: "전체",
-      ageDate: "2026.01.01",
-      gender: "",
-      job: "",
-      edu: "",
-      major: "",
-      income: "",
-      special: "",
-    });
-    setOpen({
-      subject: true,
-      region: true,
-      age: true,
-      gender: true,
-      job: true,
-      edu: true,
-      major: true,
-      income: true,
-      special: true,
-    });
-  };
+  const toggleSection = (key) => setOpen((prev) => ({ ...prev, [key]: !prev[key] }));
+
+
+  // const reset = () => {
+  //   setFilters({
+  //     category: "전체", //주제(카테고리)
+  //     regionName: "전체", //지역
+  //     ageDate: "2026.01.01", // 연령대
+  //     gender: "", // 상별
+  //     jobCd: "", //취업상태
+  //     schoolCd: "", //힉력
+  //     plcyMajorCd: "", //전공
+  //     earnCndSeCd: "", //소득요건
+  //     sbizCd: "", //특화요건
+  //   });
+  //   setOpen({
+  //     category: true,
+  //     regionName: true,
+  //     ageDate: true,
+  //     gender: true,
+  //     jobCd: true,
+  //     schoolCd: true,
+  //     plcyMajorCd: true,
+  //     earnCndSeCd: true,
+  //     sbizCd: true,
+  //   });
+  // };
 
 
   return (
@@ -156,43 +182,213 @@ const statusClass = {
               <h2>검색필터</h2>
               <p>초기화</p>
             </div>
-      
-            {/* <h3>주제</h3>
-            {["전체", "주거", "취업", "금융", "복지", "교육", "창업"].map(cat => (
-              <button
-                key={cat}
-                className={subject === cat ? "active" : ""}
-                onClick={() => setSubject(cat)}
-              >
-                {cat}
-              </button>
-            ))} */}
-            {/* 주제 */}
-          <div className="section">
-            {sectionTitle("주제", "subject")}
-            <div className={`content ${open.subject ? "" : "hidden"}`}>
-              <div className="list">
-                {SUBJECTS.map((s) => (
-                  <button
-                    key={s.label}
-                    type="button"
-                    className={`rowBtn ${filters.subject === s.label ? "active" : ""}`}
-                    onClick={() => setFilters((p) => ({ ...p, subject: s.label }))}
-                  >
-                    <span className="icon">{s.icon}</span>
-                    <span>{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+
+            {/* 01 주제 */}
+            <button className="toggle-btn" onClick={() => toggleSection("category")}>주제<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.category ? "" : "hidden"}`}>
+              {CATEGORY.map((c) => (
+              <li key = {c.label}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={categories.includes(c.label)}
+                    onChange={() =>
+                      setCategories((prev) =>
+                        prev.includes(c.label)
+                          ? prev.filter((v) => v !== c.label)
+                          : [...prev, c.label]
+                      )
+                    }
+                  />
+                  <span style={{ marginRight: 8 }}>{c.icon}</span>
+                  {c.label}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 지역 */}
+            <button className="toggle-btn" onClick={() => toggleSection("regionName")}>지역<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 연령대 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>연령대<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              <li >
+                <label>
+                  <input
+                    type="input"
+             
+                  />
+              
+                </label>
+              </li>
+            </ul>
+
+            {/* 성별 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>성별<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["남", "여"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 취업상태 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>취업상태<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 학력상태 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>학력상태<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 전공 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>전공<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 소득요건 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>소득요건<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
+            {/* 특화요건 */}
+            <button className="toggle-btn" onClick={() => toggleSection("subject")}>특화요건<ChevronDown size={16} /></button>
+            <ul id="myList" className={`list ${open.subject ? "" : "hidden"}`}>
+              {["항목 1", "항목 2", "항목 3"].map((item) => (
+              <li key = {item}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={subjects.includes(item)}
+                    onChange={() =>
+                      setSubjects((prev) =>
+                        prev.includes(item)
+                          ? prev.filter((v) => v !== item)
+                          : [...prev, item]
+                      )
+                    }
+                  />
+                  {item}
+                </label>
+              </li>
+              ))}
+            </ul>
+
           </aside>
 
           {/* 카드 영역 */}
           <section className="cards">
             {filtered.map(p => (
               <Motion.div>
-                <div key={p.id} className="card">
+                <div key={p.policyId} className="card">
                   <div>
                     <div className="card-top">
                       {/* 접수중 */}
@@ -314,32 +510,17 @@ const PolicyWrap = styled.div`
       h2{ font-size: 20px; font-weight: 600; }
       p{ font-size: 16px; font-weight: 500; cursor:pointer; }
     }
+    .toggle-btn{ width: 100%; display: flex; align-items: center; padding: 10px 20px; justify-content: space-between; font-size: 18px; font-weight: 700; color:var(--blue-800);  }
+
+    .list > li { padding: 10px 12px; cursor: pointer; margin:4px 8px; border-radius:8px;  }
+    .list > li:hover { background-color: #F1F5F9;  }
+    .list > li:active { background-color: #F1F5F9;  }
   }
   .sidebar h3{
     font-size:15px;
     margin-bottom:10px;
   }
 
-  .sidebar button{
-    display:block;
-    width:100%;
-    text-align:left;
-    padding:10px;
-    border:none;
-    background:#fff;
-    cursor:pointer;
-    border-radius:8px;
-    font-size:14px;
-  }
-
-  .sidebar button:hover{
-    background:#f1f5f9;
-  }
-
-  .sidebar .active{
-    background:#2563eb;
-    color:#fff;
-  }
 
   /* 카드 리스트 */
   .cards{

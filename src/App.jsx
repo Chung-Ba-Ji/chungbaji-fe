@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/common/Navbar';
-import Hero from './components/common/Hero'; 
+import Hero from './components/common/Hero';
 import PolicyList from './pages/PolicyList';
 import Community from './pages/Community';
 import CalendarView from './pages/Calendar';
@@ -68,6 +68,19 @@ export default function App() {
   const [authMode, setAuthMode] = useState('login');
   const [bookmarks, setBookmarks] = useState([1, 3]); // Initial mock bookmarks
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (token && storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user from localStorage", e);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
   const handleLoginClick = () => {
     setAuthMode('login');
     setShowAuthModal(true);
@@ -101,9 +114,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-teal-100 selection:text-teal-900">
-      <Navbar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         user={user}
         onLoginClick={handleLoginClick}
       />
@@ -120,13 +133,13 @@ export default function App() {
 
         {activeTab === 'policies' && (
           <div className="animate-in fade-in duration-500">
-             <PolicyList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
+            <PolicyList bookmarks={bookmarks} toggleBookmark={toggleBookmark} />
           </div>
         )}
 
         {activeTab === 'community' && (
           <div className="animate-in slide-in-from-bottom-4 duration-500">
-            <Community />
+            <Community user={user} />
           </div>
         )}
 
@@ -140,13 +153,13 @@ export default function App() {
       {/* Auth Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
             onClick={() => setShowAuthModal(false)}
           ></div>
           <div className="relative z-10 w-full max-w-md animate-in zoom-in-95 duration-200">
-            <Auth 
-              mode={authMode} 
+            <Auth
+              mode={authMode}
               onToggleMode={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}
               onLoginSuccess={handleLoginSuccess}
             />
@@ -155,7 +168,7 @@ export default function App() {
       )}
 
       <Toaster position="top-center" />
-      
+
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12">
         <div className="max-w-7xl mx-auto px-4">

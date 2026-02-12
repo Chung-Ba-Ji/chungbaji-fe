@@ -2,17 +2,62 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
+import { communityApi } from '../api/community';
+import { toast } from 'sonner';
+
 const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      let data;
+      if (mode === 'login') {
+        data = await communityApi.login(email, password);
+      } else {
+        // SignUp
+        data = await communityApi.signUp({
+          email,
+          password,
+          nickname: name,
+          phone_num: '010-0000-0000',
+          gender: 'M',
+          birth_date: '2000-01-01'
+        });
+      }
+
+      // Check for token in response (common patterns: accessToken, token, or sometimes directly in body)
+      // If the backend strictly follows MemberResponseDTO, it might not return a token there.
+      // But usually login returns a token. We'll store it if found.
+      const token = data.accessToken || data.token;
+      if (token) {
+        localStorage.setItem('token', token);
+      } else if (data && typeof data === 'string') {
+        // Sometimes simple string response is the token?
+        // But MemberResponseDTO is object.
+      }
+
+      // If the backend puts the token in the header, we missed it because handleResponse returns body.
+      // We will rely on 'accessToken' in body for now.
+
+      localStorage.setItem('user', JSON.stringify(data));
+      toast.success(mode === 'login' ? '로그인 성공!' : '회원가입 성공!');
+
+      // Pass the member data to parent
+      onLoginSuccess(data);
+
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || (mode === 'login' ? '로그인에 실패했습니다.' : '회원가입에 실패했습니다.'));
+    } finally {
       setIsLoading(false);
-      onLoginSuccess({ name: '홍길동', email: 'user@example.com' });
-    }, 1500);
+    }
   };
   return (
     <div className="w-full max-w-md mx-auto">
@@ -35,8 +80,10 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
               <label className="text-sm font-semibold text-slate-700 ml-1">이름</label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="실명을 입력해주세요"
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
                   required
@@ -49,8 +96,10 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
             <label className="text-sm font-semibold text-slate-700 ml-1">이메일</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input 
-                type="email" 
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@email.com"
                 className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
                 required
@@ -62,13 +111,15 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
             <label className="text-sm font-semibold text-slate-700 ml-1">비밀번호</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input 
-                type={showPassword ? "text" : "password"} 
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
                 required
               />
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
@@ -86,7 +137,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
             </div>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={isLoading}
             className="w-full py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
@@ -105,7 +156,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
         <div className="mt-8 text-center">
           <p className="text-slate-500 text-sm">
             {mode === 'login' ? '아직 회원이 아니신가요?' : '이미 계정이 있으신가요?'}
-            <button 
+            <button
               onClick={onToggleMode}
               className="ml-2 text-teal-600 font-bold hover:underline"
             >

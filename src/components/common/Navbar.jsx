@@ -29,11 +29,11 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
           className="flex items-center gap-2 cursor-pointer" 
           onClick={() => setActiveTab('home')}
         >
-          <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">Y</span>
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-            YouthHub
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
+            청바지
           </span>
         </div>
 
@@ -44,7 +44,7 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
               key={item.id}
               onClick={() => setActiveTab(item.id)}
               className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                activeTab === item.id ? 'text-teal-600' : 'text-slate-500 hover:text-teal-500'
+                activeTab === item.id ? 'text-blue-600' : 'text-slate-500 hover:text-blue-500'
               }`}
             >
               {item.label}
@@ -55,7 +55,7 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
         <div className="hidden md:flex items-center gap-4">
           {user ? (
             <div className="flex items-center gap-3">
-              <button className="p-2 text-slate-400 hover:text-teal-600 transition-colors">
+              <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
                 <Bell size={20} />
               </button>
               <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
@@ -76,7 +76,7 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
           ) : (
             <button 
               onClick={onLoginClick}
-              className="px-5 py-2 rounded-full bg-teal-600 text-white text-sm font-semibold hover:bg-teal-700 transition-colors"
+              className="px-5 py-2 rounded-full bg-blue-primary text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
             >
               로그인
             </button>
@@ -105,7 +105,7 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
                   setIsOpen(false);
                 }}
                 className={`flex items-center gap-3 text-base font-medium ${
-                  activeTab === item.id ? 'text-teal-600' : 'text-slate-500'
+                  activeTab === item.id ? 'text-blue-600' : 'text-slate-500'
                 }`}
               >
                 {item.icon}

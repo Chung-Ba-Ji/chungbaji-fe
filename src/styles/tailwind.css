@@ -4,5 +4,19 @@
 @source "../**/*.{js,ts,jsx,tsx}";
 
 @theme {
-  --color-brand: #0d9488;
+  --color-blue-50: #eef0ff;
+  --color-blue-100: #d8dbfe;
+  --color-blue-200: #b4bcfe;
+  --color-blue-300: #94a0fd;
+  --color-blue-400: #7386fd;
+  --color-blue-500: #4e6cfc;
+  --color-blue-primary: #1352fb;
+  --color-blue-700: #0b42d0;
+  --color-blue-800: #062d96;
+  --color-blue-900: #021759;
+  --color-blue-950: #010c39;
+
+  /* 자주 쓰는 이름을 별칭 */
+  --color-primary: var(--color-blue-primary);
+  --color-primary-hover: var(--color-blue-700);
 }

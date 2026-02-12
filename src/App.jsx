@@ -142,7 +142,7 @@ export default function App() {
 
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-teal-100 selection:text-teal-900">
+    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
       <Navbar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
@@ -210,7 +210,7 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             <div className="col-span-1 md:col-span-1">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-primary rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">Y</span>
                 </div>
                 <span className="text-xl font-bold text-white">YouthHub</span>
@@ -223,9 +223,9 @@ export default function App() {
             <div>
               <h4 className="text-white font-bold mb-6">서비스</h4>
               <ul className="space-y-4 text-sm">
-                <li><button onClick={() => setActiveTab('policies')} className="hover:text-teal-400 transition-colors">정책 찾기</button></li>
-                <li><button onClick={() => setActiveTab('community')} className="hover:text-teal-400 transition-colors">커뮤니티</button></li>
-                <li><button onClick={() => setActiveTab('calendar')} className="hover:text-teal-400 transition-colors">내 일정 관리</button></li>
+                <li><button onClick={() => setActiveTab('policies')} className="hover:text-blue-400 transition-colors">정책 찾기</button></li>
+                <li><button onClick={() => setActiveTab('community')} className="hover:text-blue-400 transition-colors">커뮤니티</button></li>
+                <li><button onClick={() => setActiveTab('calendar')} className="hover:text-blue-400 transition-colors">내 일정 관리</button></li>
               </ul>
             </div>
             <div>

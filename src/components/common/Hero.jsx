@@ -7,7 +7,7 @@ const Hero = ({ onFindPolicyClick }) => {
   return (
     <div className="relative overflow-hidden bg-white pt-24 pb-16 md:pt-32 md:pb-24">
       {/* Background patterns */}
-      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-teal-100/50 rounded-full blur-3xl opacity-50"></div>
+      <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl opacity-50"></div>
       <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl opacity-50"></div>
 
       <div className="max-w-7xl mx-auto px-4">
@@ -17,7 +17,7 @@ const Hero = ({ onFindPolicyClick }) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-bold mb-6"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold mb-6"
             >
               <Sparkles size={14} />
               <span>2026년 최신 청년 정책 업데이트 완료</span>
@@ -30,7 +30,7 @@ const Hero = ({ onFindPolicyClick }) => {
               className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 leading-[1.15] mb-6"
             >
               당신의 꿈을 응원하는 <br />
-              <span className="text-teal-600">청년 정책</span>의 모든 것
+              <span className="text-blue-600">청년 정책</span>의 모든 것
             </Motion.h1>
 
             <Motion.p 
@@ -51,12 +51,12 @@ const Hero = ({ onFindPolicyClick }) => {
             >
               <button 
                 onClick={onFindPolicyClick}
-                className="w-full sm:w-auto px-8 py-4 bg-teal-600 text-white font-bold rounded-2xl hover:bg-teal-700 transition-all shadow-xl shadow-teal-600/20 flex items-center justify-center gap-2 text-lg"
+                className="w-full sm:w-auto px-8 py-4 bg-blue-primary text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-teal-600/20 flex items-center justify-center gap-2 text-lg"
               >
                 정책 맞춤 추천받기
                 <ChevronRight size={20} />
               </button>
-              <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-teal-200 hover:text-teal-600 transition-all flex items-center justify-center gap-2 text-lg">
+              <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-teal-200 hover:text-blue-600 transition-all flex items-center justify-center gap-2 text-lg">
                 인기 커뮤니티 보기
               </button>
             </Motion.div>

@@ -18,7 +18,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-600/20">
+          <div className="w-16 h-16 bg-blue-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-600/20">
             <span className="text-white font-bold text-3xl">Y</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-800">
@@ -80,7 +80,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
 
           {mode === 'login' && (
             <div className="flex items-center justify-end">
-              <button type="button" className="text-xs font-semibold text-teal-600 hover:underline">
+              <button type="button" className="text-xs font-semibold text-blue-600 hover:underline">
                 비밀번호를 잊으셨나요?
               </button>
             </div>
@@ -89,7 +89,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
+            className="w-full py-4 bg-blue-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -107,7 +107,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
             {mode === 'login' ? '아직 회원이 아니신가요?' : '이미 계정이 있으신가요?'}
             <button 
               onClick={onToggleMode}
-              className="ml-2 text-teal-600 font-bold hover:underline"
+              className="ml-2 text-blue-600 font-bold hover:underline"
             >
               {mode === 'login' ? '회원가입' : '로그인'}
             </button>

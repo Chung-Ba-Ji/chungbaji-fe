@@ -74,8 +74,8 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
         
         // 해당 날짜에 마감인 정책 필터링
         const dayPolicies = bookmarkedPolicies.filter(p => {
-            if (!p.deadline) return false;
-            const deadline = parseISO(p.deadline);
+            if (!p.endDate) return false; // deadline -> endDate
+            const deadline = parseISO(p.endDate); // 백엔드에서 주는 "2026-03-30" 형태 파싱
             return isSameDay(day, deadline);
         });
 
@@ -97,7 +97,7 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
             <div className="mt-2 space-y-1 overflow-hidden">
                 {dayPolicies.map(p => (
                     <div key={p.id} className="text-[10px] p-1 bg-amber-100 text-amber-700 rounded border-l-2 border-amber-500 truncate font-bold">
-                        {p.title}
+                        {p.policyTitle}
                     </div>
                 ))}
             </div>
@@ -116,7 +116,9 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
   };
 
   // 선택된 날짜의 정책 리스트
-  const selectedDayPolicies = bookmarkedPolicies.filter(p => p.deadline && isSameDay(selectedDate, parseISO(p.deadline)));
+  const selectedDayPolicies = bookmarkedPolicies.filter(p => 
+    p.endDate && isSameDay(selectedDate, parseISO(p.endDate))
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -137,12 +139,12 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
             {selectedDayPolicies.length > 0 ? (
               <div className="space-y-4">
                 {selectedDayPolicies.map(p => (
-                  <div key={p.id} className="p-4 rounded-xl bg-teal-50 border border-teal-100 group">
+                  <div key={p.scheduleId} className="p-4 rounded-xl bg-teal-50 border border-teal-100 group">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="px-2 py-0.5 rounded bg-teal-600 text-white text-[10px] font-bold">마감</span>
-                      <span className="text-xs font-bold text-teal-700">{p.category}</span>
+                      <span className="text-xs font-bold text-teal-700">청년정책</span>
                     </div>
-                    <h4 className="text-sm font-bold text-slate-800 mb-2">{p.title}</h4>
+                    <h4 className="text-sm font-bold text-slate-800 mb-2">{p.policyTitle}</h4>
                     <div className="flex items-center gap-2 text-[11px] text-slate-500">
                       <MapPin size={12} />
                       {p.region}
@@ -170,7 +172,7 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
                                 <div className="w-2 h-2 rounded-full bg-teal-400"></div>
                                 <span className="text-xs text-slate-600 truncate">{p.title}</span>
                                 <span className="text-[10px] text-slate-400 ml-auto whitespace-nowrap">
-                                  {p.deadline ? format(parseISO(p.deadline), 'MM.dd') : '기한없음'}
+                                  {p.endDate ? format(parseISO(p.endDate), 'MM.dd') : '기한없음'}
                                 </span>
                             </div>
                         ))

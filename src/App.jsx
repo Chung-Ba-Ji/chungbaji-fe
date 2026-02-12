@@ -213,7 +213,7 @@ export default function App() {
                 <div className="w-8 h-8 bg-blue-primary rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-xl">Y</span>
                 </div>
-                <span className="text-xl font-bold text-white">YouthHub</span>
+                <span className="text-xl font-bold text-white">청바지</span>
               </div>
               <p className="text-sm leading-relaxed">
                 대한민국 모든 청년들의 <br />
@@ -246,7 +246,7 @@ export default function App() {
             </div>
           </div>
           <div className="pt-8 border-t border-slate-800 text-center text-xs">
-            <p>© 2026 YouthHub. All rights reserved.</p>
+            <p>© 2026 chungbaji. All rights reserved.</p>
           </div>
         </div>
       </footer>

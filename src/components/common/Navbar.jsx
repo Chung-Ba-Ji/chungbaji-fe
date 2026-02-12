@@ -36,8 +36,8 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick }) => {
           <div className="w-8 h-8 bg-blue-primary rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-xl">Y</span>
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-            YouthHub
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-600 bg-clip-text text-transparent">
+            청바지
           </span>
         </div>
 

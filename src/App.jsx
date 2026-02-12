@@ -144,7 +144,9 @@ export default function App() {
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
             onClick={() => setShowAuthModal(false)}
           ></div>
-          <div className="relative z-10 w-full max-w-md animate-in zoom-in-95 duration-200">
+          <div className={`relative z-10 w-full transition-all duration-500 animate-in zoom-in-95 ${
+            authMode === 'signup' ? 'max-w-[1100px]' : 'max-w-md'
+          }`}>
             <Auth 
               mode={authMode} 
               onToggleMode={() => setAuthMode(authMode === 'login' ? 'signup' : 'login')}

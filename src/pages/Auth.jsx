@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Phone, Heart } from 'lucide-react';
 import api from '../api/axios';
 
@@ -6,17 +6,84 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // DB 옵션 데이터 저장소
+  const [options, setOptions] = useState({
+    sido: [],
+    sigungu: [],
+    jobs: [],
+    educations: [],
+    majors: [],
+    incomes: [],
+    specials: []
+  });
+
+  // 필드
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', phone_num: '',
     nickname: '', gender: '', birth_date: '', 
-    regionSido: '', regionSigungu: '',
+    region_sido: '', region_sigungu: '',
     job_code: '', education_code: '', major_code: '',
     income_code: '', special_code: ''
   });
 
+  // 초기 로드: 시도 및 공통 코드 목록 가져오기
+  useEffect(() => {
+    if (mode === 'signup') {
+      const fetchInitialData = async () => {
+        try {
+          const [sido, jobs, edus, majors, incomes, specials] = await Promise.all([
+            api.get('/api/regions/sido'),
+            api.get('/api/codes/jobs'),
+            api.get('/api/codes/educations'),
+            api.get('/api/codes/majors'),
+            api.get('/api/codes/incomes'),
+            api.get('/api/codes/specials')
+          ]);
+
+          setOptions(prev => ({
+            ...prev,
+            sido: Array.isArray(sido.data) ? sido.data : [],
+            jobs: Array.isArray(jobs.data) ? jobs.data : [],
+            educations: Array.isArray(edus.data) ? edus.data : [],
+            majors: Array.isArray(majors.data) ? majors.data : [],
+            incomes: Array.isArray(incomes.data) ? incomes.data : [],
+            specials: Array.isArray(specials.data) ? specials.data : []
+          }));
+        } catch (error) {
+          console.error("데이터 로드 실패:", error);
+        }
+      };
+      fetchInitialData();
+    }
+  }, [mode]);
+
+  // 시도 변경 시 시군구 목록 동적 로드
+  useEffect(() => {
+    if (formData.region_sido) {
+      const fetchSigungu = async () => {
+        try {
+          const response = await api.get(`/api/regions/sigungu/${formData.region_sido}`);
+          setOptions(prev => ({ 
+            ...prev, 
+            sigungu: Array.isArray(response.data) ? response.data : [] 
+          }));
+        } catch (error) {
+          console.error("시군구 로드 실패:", error);
+        }
+      };
+      fetchSigungu();
+    } else {
+      setOptions(prev => ({ ...prev, sigungu: [] }));
+    }
+  }, [formData.region_sido]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: value,
+      ...(name === 'region_sido' && { region_sigungu: '' })
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -24,16 +91,31 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
     setIsLoading(true);
     try {
       if (mode === 'login') {
-        const response = await api.post('/api/member/login', {
+        // --- 로그인 ---
+        const response = await api.post('/api/members/login', {
           email: formData.email,
           password: formData.password
         });
-        const { token, user } = response.data;
-        if (token) localStorage.setItem('token', token);
-        onLoginSuccess(user);
+
+        // 사용자 정보는 응답 바디(response.data)에 위치
+        const userData = response.data;
+
+        // 토큰은 응답 헤더(headers)에 위치
+        const authHeader = response.headers['authorization'];
+        
+        if (authHeader) {
+          const tokenValue = authHeader.startsWith('Bearer ') 
+                             ? authHeader.split(' ')[1] 
+                             : authHeader;
+          localStorage.setItem('token', tokenValue);
+        }
+
+        if (onLoginSuccess) onLoginSuccess(userData);
+        
       } else {
+        // --- 회원가입 ---
         await api.post('/api/members/signUp', formData);
-        alert('회원가입이 완료되었습니다!');
+        alert('회원가입이 완료되었습니다! 로그인해 주세요.');
         onToggleMode();
       }
     } catch (error) {
@@ -45,9 +127,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
 
   return (
     <div className={`mx-auto my-4 transition-all duration-500 ease-in-out ${
-      mode === 'signup' 
-        ? 'w-[95vw] max-w-[1100px]' 
-        : 'w-full max-w-[450px]'
+      mode === 'signup' ? 'w-[95vw] max-w-[1100px]' : 'w-full max-w-[450px]'
     }`}>
       
       <div className="bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl border border-slate-100 max-h-[85vh] overflow-y-auto scrollbar-hide">
@@ -62,18 +142,11 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className={`grid gap-y-6 ${
-            mode === 'signup' 
-              ? 'md:grid-cols-10 md:gap-x-12' 
-              : 'grid-cols-1'
-          }`}>
+          <div className={`grid gap-y-6 ${mode === 'signup' ? 'md:grid-cols-10 md:gap-x-12' : 'grid-cols-1'}`}>
             
-            {/* --- 좌측 섹션 (4/10): 계정 정보 --- */}
             <div className={`${mode === 'signup' ? 'md:col-span-4' : ''} space-y-4`}>
               {mode === 'signup' && <p className="text-[11px] font-bold text-teal-600 uppercase tracking-widest border-b pb-1 border-slate-100">계정 정보</p>}
               <div className="grid gap-3">
-                
-                {/* 1. 이메일 */}
                 <div className="form-group">
                   <label className="label-style">이메일 *</label>
                   <div className="relative">
@@ -82,7 +155,6 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                   </div>
                 </div>
 
-                {/* 2. 비밀번호 */}
                 <div className="form-group">
                   <label className="label-style">비밀번호 *</label>
                   <div className="relative">
@@ -96,7 +168,6 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
 
                 {mode === 'signup' && (
                   <>
-                    {/* 3. 실명 */}
                     <div className="form-group">
                       <label className="label-style">이름 *</label>
                       <div className="relative">
@@ -104,8 +175,6 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                         <input name="name" type="text" value={formData.name} onChange={handleChange} placeholder="실명 입력" className="input-style" required />
                       </div>
                     </div>
-
-                    {/* 4. 별명 */}
                     <div className="form-group">
                       <label className="label-style">별명 *</label>
                       <div className="relative">
@@ -113,8 +182,6 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                         <input name="nickname" type="text" value={formData.nickname} onChange={handleChange} placeholder="닉네임 입력" className="input-style" required />
                       </div>
                     </div>
-
-                    {/* 5. 전화번호 */}
                     <div className="form-group">
                       <label className="label-style">전화번호 *</label>
                       <div className="relative">
@@ -127,7 +194,6 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
               </div>
             </div>
 
-            {/* --- 우측 섹션 (6/10): 맞춤 정책 정보 --- */}
             {mode === 'signup' && (
               <div className="md:col-span-6 space-y-5 md:border-l md:border-slate-50 md:pl-10">
                 <p className="text-[11px] font-bold text-teal-600 uppercase tracking-widest border-b pb-1 border-slate-100">맞춤 정책 정보</p>
@@ -146,31 +212,20 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                     </select>
                   </div>
 
-                  {/* 거주 지역 (대분류/소분류) */}
                   <div className="form-group col-span-2">
                     <label className="label-style">거주 지역 *</label>
                     <div className="grid grid-cols-2 gap-3">
-                      <select name="regionSido" value={formData.regionSido} onChange={handleChange} className="input-style-no-icon" required>
+                      <select name="region_sido" value={formData.region_sido} onChange={handleChange} className="input-style-no-icon" required>
                         <option value="">시/도 선택</option>
-                        <option value="서울특별시">서울특별시</option>
-                        <option value="GYEONGGI">경기도</option>
+                        {options.sido?.map(opt => (
+                          <option key={opt.region_code} value={opt.region_code}>{opt.region_name}</option>
+                        ))}
                       </select>
-                      <select name="regionSigungu" value={formData.regionSigungu} onChange={handleChange} className="input-style-no-icon" required disabled={!formData.regionSido}>
+                      <select name="region_sigungu" value={formData.region_sigungu} onChange={handleChange} className="input-style-no-icon" required disabled={!formData.region_sido}>
                         <option value="">시/군/구 선택</option>
-                        {formData.regionSido === '서울특별시' && (
-                          <>
-                            <option value="서울특별시 종로구">서울특별시 종로구</option>
-                            <option value="S02">강동구</option>
-                            <option value="S03">강북구</option>
-                          </>
-                        )}
-                        {formData.regionSido === 'GYEONGGI' && (
-                          <>
-                            <option value="G01">수원시</option>
-                            <option value="G02">용인시</option>
-                            <option value="G03">고양시</option>
-                          </>
-                        )}
+                        {options.sigungu?.map(opt => (
+                          <option key={opt.region_code} value={opt.region_code}>{opt.region_name}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
@@ -179,21 +234,18 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                     <label className="label-style">취업 상태 *</label>
                     <select name="job_code" value={formData.job_code} onChange={handleChange} className="input-style-no-icon" required>
                       <option value="">상태 선택</option>
-                      <option value="0013001">취준생</option>
-                      <option value="J02">직장인</option>
+                      {options.jobs?.map(opt => <option key={opt.code} value={opt.code}>{opt.code_desc}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="label-style">최종 학력 *</label>
                     <select name="education_code" value={formData.education_code} onChange={handleChange} className="input-style-no-icon" required>
                       <option value="">학력 선택</option>
-                      <option value="0049001">고졸</option>
-                      <option value="E02">대졸</option>
+                      {options.educations?.map(opt => <option key={opt.code} value={opt.code}>{opt.code_desc}</option>)}
                     </select>
                   </div>
                 </div>
 
-                {/* 추가 선택 정보 */}
                 <div className="mt-2 p-5 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
                   <p className="text-[10px] font-bold text-slate-400 uppercase text-center tracking-widest">추가 선택 정보</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -201,8 +253,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                       <label className="label-style">전공 분야</label>
                       <select name="major_code" value={formData.major_code} onChange={handleChange} className="input-style-no-icon bg-white">
                         <option value="">전공 선택</option>
-                        <option value="0011001">인문/사회</option>
-                        <option value="M02">공학/IT</option>
+                        {options.majors?.map(opt => <option key={opt.code} value={opt.code}>{opt.code_desc}</option>)}
                       </select>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -210,14 +261,14 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                         <label className="label-style">소득 구간</label>
                         <select name="income_code" value={formData.income_code} onChange={handleChange} className="input-style-no-icon bg-white">
                           <option value="">선택</option>
-                          <option value="0043001">100% 이하</option>
+                          {options.incomes?.map(opt => <option key={opt.code} value={opt.code}>{opt.code_desc}</option>)}
                         </select>
                       </div>
                       <div className="form-group">
                         <label className="label-style">특화 분류</label>
                         <select name="special_code" value={formData.special_code} onChange={handleChange} className="input-style-no-icon bg-white">
                           <option value="">선택</option>
-                          <option value="0014001">중소기업</option>
+                          {options.specials?.map(opt => <option key={opt.code} value={opt.code}>{opt.code_desc}</option>)}
                         </select>
                       </div>
                     </div>
@@ -240,7 +291,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
         </form>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
         .label-style { font-size: 0.75rem; font-weight: 700; color: #475569; margin-left: 0.1rem; }
         .input-style { width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 0.75rem; background-color: #f8fafc; border: 1px solid #f1f5f9; outline: none; font-size: 0.9rem; transition: all 0.2s; }

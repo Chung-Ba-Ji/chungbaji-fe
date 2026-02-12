@@ -4,19 +4,15 @@ import {
   Calendar as CalendarIcon, 
   MessageSquare, 
   User, 
-  Bookmark, 
-  Menu, 
-  X, 
-  ChevronRight,
-  Filter,
   Bell,
   LogOut,
-  Plus
+  Filter,
+  Menu,
+  X
 } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
-import { ImageWithFallback } from '../ui/figma/ImageWithFallback';
 
-const Navbar = ({ activeTab, setActiveTab, user, onLoginClick }) => {
+const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
@@ -66,7 +62,15 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick }) => {
                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
                   <User size={18} />
                 </div>
-                <span className="text-sm font-medium text-slate-700">{user.name}</span>
+                <span className="text-sm font-medium text-slate-700">{user.nickname}님</span>
+                
+                <button 
+                  onClick={onLogout}
+                  className="ml-2 p-2 text-slate-400 hover:text-red-500 transition-colors"
+                  title="로그아웃"
+                >
+                  <LogOut size={18} />
+                </button>
               </div>
             </div>
           ) : (
@@ -111,16 +115,31 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick }) => {
             <hr className="border-slate-100" />
             {!user ? (
               <button 
-                onClick={onLoginClick}
+                onClick={() => {
+                  onLoginClick();
+                  setIsOpen(false);
+                }}
                 className="w-full py-3 rounded-xl bg-teal-600 text-white font-semibold"
               >
                 로그인 / 회원가입
               </button>
             ) : (
-              <button className="flex items-center gap-3 text-slate-500 font-medium">
-                <LogOut size={20} />
-                로그아웃
-              </button>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 px-1">
+                   <User size={20} className="text-teal-600" />
+                   <span className="font-medium text-slate-700">{user.nickname}님</span>
+                </div>
+                <button 
+                  onClick={() => {
+                    onLogout();
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 py-2 text-red-500 font-medium"
+                >
+                  <LogOut size={20} />
+                  로그아웃
+                </button>
+              </div>
             )}
           </div>
         </Motion.div>

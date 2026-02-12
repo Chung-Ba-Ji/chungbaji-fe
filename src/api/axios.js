@@ -10,7 +10,7 @@ const instance = axios.create({
   },
 });
 
-// 요청 인터셉터: 로컬 스토리지에 토큰이 있다면 모든 요청 헤더에 자동으로 포함
+// 요청 인터셉터
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -19,7 +19,17 @@ instance.interceptors.request.use(
     }
     return config;
   },
+  (error) => Promise.reject(error)
+);
+
+// 응답 인터셉터 추가
+instance.interceptors.response.use(
+  (response) => response,
   (error) => {
+    // 401 에러(Unauthorized) 발생 시 로그아웃 처리
+    if (error.response?.status === 401) {
+      console.warn("인증이 만료되었습니다. 다시 로그인해주세요.");
+    }
     return Promise.reject(error);
   }
 );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, ThumbsUp, MessageSquare } from 'lucide-react'; 
 import PostList from '../components/community/PostList';
 import PostDetail from '../components/community/PostDetail';
 import PostForm from '../components/community/PostForm';
@@ -23,35 +24,35 @@ const Community = ({ user }) => {
     toast.success('게시글이 등록되었습니다.');
   };
 
+  // 글쓰기 버튼 클릭 핸들러 (로그인 체크 포함)
+  const handleWriteClick = () => {
+    if (!user) {
+      toast.error('로그인이 필요한 서비스입니다.');
+      return;
+    }
+    setView('write');
+  };
+
   return (
     <section className="py-8 bg-slate-50/50 min-h-screen px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-slate-800">청년 커뮤니티</h2>
-          <button className="bg-blue-primary text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
-            <Plus size={20} /> 글쓰기
-          </button>
-        </div>
-        <div className="space-y-4">
-          {POSTS.map(post => (
-            <div key={post.id} className="bg-white rounded-2xl border p-6 hover:shadow-md transition-all">
-              <div className="flex items-center gap-2 mb-3 text-xs text-slate-400">
-                <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">{post.category}</span>
-                <span>{post.time}</span>
-              </div>
-              <h4 className="text-lg font-bold mb-2">{post.title}</h4>
-              <p className="text-sm text-slate-500 mb-4">{post.content}</p>
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold">{post.author}</span>
-                <div className="flex gap-4">
-                  <span className="flex items-center gap-1"><ThumbsUp size={16}/> {post.likes}</span>
-                  <span className="flex items-center gap-1"><MessageSquare size={16}/> {post.comments}</span>
-                </div>
-              </div>
+        {/* 헤더 섹션: 리스트 보기일 때만 제목과 글쓰기 버튼 노출 */}
+        {view === 'list' && (
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">청년 커뮤니티</h2>
+              <p className="text-sm text-slate-500 mt-1">다양한 청년 정책 후기와 정보를 나누어보세요.</p>
             </div>
-          ))}
-        </div>
+            <button 
+              onClick={handleWriteClick}
+              className="bg-blue-primary text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+            >
+              <Plus size={20} /> 글쓰기
+            </button>
+          </div>
+        )}
 
+        {/* 뷰 전환 로직 */}
         {view === 'list' && (
           <div className="animate-in fade-in duration-300">
             <PostList

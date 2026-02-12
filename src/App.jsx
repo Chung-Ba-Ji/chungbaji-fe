@@ -168,7 +168,7 @@ export default function App() {
 
         {activeTab === 'community' && (
           <div className="animate-in slide-in-from-bottom-4 duration-500">
-            <Community />
+            <Community user={user} />
           </div>
         )}
 

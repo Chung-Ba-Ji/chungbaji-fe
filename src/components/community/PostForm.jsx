@@ -27,32 +27,41 @@ const PostForm = ({ onCancel, onSuccess, user }) => {
         }
 
         setLoading(true);
+
         try {
             const postData = {
-                title,
-                content,
-                memberId: user.memberId || user.id || 1, // Fallback to 1 if testing without real auth, but prefer user prop
-                policyId: null,
-                codeId: parseInt(codeId, 10),
-                isAnonymous: 'N',
+                title: title,
+                content: content,
+                member_id: user.member_id || user.memberId || user.id,
+                code_id: parseInt(codeId, 10),
+                policy_id: null,
+                is_anonymous: 'N',
                 status: 'ACTIVE'
             };
 
-            await communityApi.createPost(postData);
-            onSuccess();
+            // API 호출
+            const response = await communityApi.createPost(postData);
+
+            if (response) {
+                toast.success('게시글이 성공적으로 등록되었습니다.');
+                onSuccess(); // 목록으로 돌아가기 또는 초기화
+            }
         } catch (error) {
-            console.error("Failed to create post:", error);
-            toast.error("게시글 등록에 실패했습니다.");
+            console.error(">>> [PostForm] 등록 실패 상세:", error);
+            
+            const errorMessage = error.response?.data || "게시글 등록 중 오류가 발생했습니다.";
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm">
+        <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-100 shadow-sm animate-in fade-in duration-500">
             <h2 className="text-xl font-bold text-slate-800 mb-6">새 게시글 작성</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+                {/* 카테고리 선택 */}
                 <div>
                     <label htmlFor="category" className="block text-sm font-bold text-slate-700 mb-2">
                         카테고리
@@ -73,6 +82,7 @@ const PostForm = ({ onCancel, onSuccess, user }) => {
                     </select>
                 </div>
 
+                {/* 제목 입력 */}
                 <div>
                     <label htmlFor="title" className="block text-sm font-bold text-slate-700 mb-2">
                         제목
@@ -87,6 +97,7 @@ const PostForm = ({ onCancel, onSuccess, user }) => {
                     />
                 </div>
 
+                {/* 내용 입력 */}
                 <div>
                     <label htmlFor="content" className="block text-sm font-bold text-slate-700 mb-2">
                         내용
@@ -100,6 +111,7 @@ const PostForm = ({ onCancel, onSuccess, user }) => {
                     />
                 </div>
 
+                {/* 버튼 영역 */}
                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                     <button
                         type="button"

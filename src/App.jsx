@@ -4,6 +4,7 @@ import Hero from './components/common/Hero';
 import PolicyList from './pages/PolicyList';
 import Community from './pages/Community';
 import CalendarView from './pages/Calendar';
+import MyPage from './pages/MyPage'; // 마이페이지 임포트
 import Auth from './pages/Auth';
 import { Toaster, toast } from 'sonner';
 import api from './api/axios';
@@ -175,6 +176,13 @@ export default function App() {
         {activeTab === 'calendar' && (
           <div className="animate-in fade-in duration-500">
             <CalendarView bookmarkedPolicies={bookmarkedPolicies} />
+          </div>
+        )}
+
+        {/* 마이페이지 섹션 추가 */}
+        {activeTab === 'mypage' && (
+          <div className="animate-in fade-in duration-500">
+            <MyPage user={user} />
           </div>
         )}
       </main>

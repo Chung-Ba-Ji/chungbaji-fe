@@ -58,14 +58,23 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
               <button className="p-2 text-slate-400 hover:text-blue-600 transition-colors">
                 <Bell size={20} />
               </button>
-              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+              {/* 마이페이지 이동 클릭 이벤트 추가 */}
+              <div 
+                className="flex items-center gap-2 pl-2 border-l border-slate-200 cursor-pointer group"
+                onClick={() => setActiveTab('mypage')}
+              >
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                   <User size={18} />
                 </div>
-                <span className="text-sm font-medium text-slate-700">{user.nickname}님</span>
+                <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors">
+                  {user.nickname}님
+                </span>
                 
                 <button 
-                  onClick={onLogout}
+                  onClick={(e) => {
+                    e.stopPropagation(); // 마이페이지 이동과 겹치지 않게 방지
+                    onLogout();
+                  }}
                   className="ml-2 p-2 text-slate-400 hover:text-red-500 transition-colors"
                   title="로그아웃"
                 >
@@ -125,10 +134,16 @@ const Navbar = ({ activeTab, setActiveTab, user, onLoginClick, onLogout }) => {
               </button>
             ) : (
               <div className="space-y-4">
-                <div className="flex items-center gap-3 px-1">
-                   <User size={20} className="text-teal-600" />
-                   <span className="font-medium text-slate-700">{user.nickname}님</span>
-                </div>
+                <button 
+                  onClick={() => {
+                    setActiveTab('mypage');
+                    setIsOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-1 w-full text-left"
+                >
+                   <User size={20} className="text-blue-600" />
+                   <span className="font-medium text-slate-700">{user.nickname}님 (마이페이지)</span>
+                </button>
                 <button 
                   onClick={() => {
                     onLogout();

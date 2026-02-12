@@ -82,14 +82,14 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
         days.push(
           <div
             key={day.toString()}
-            className={`min-h-[100px] p-2 border-r border-b border-slate-50 relative group cursor-pointer hover:bg-teal-50/30 transition-colors ${
+            className={`min-h-[100px] p-2 border-r border-b border-slate-50 relative group cursor-pointer hover:bg-blue-50/30 transition-colors ${
               !isSameMonth(day, monthStart) ? "bg-slate-50/50 text-slate-300" : "text-slate-700"
-            } ${isSameDay(day, selectedDate) ? "bg-teal-50/50" : ""}`}
+            } ${isSameDay(day, selectedDate) ? "bg-blue-50/50" : ""}`}
             onClick={() => setSelectedDate(cloneDay)}
           >
             <div className="flex justify-between items-start">
               <span className={`text-sm font-semibold ${
-                isSameDay(day, new Date()) ? "w-7 h-7 flex items-center justify-center bg-teal-600 text-white rounded-full" : ""
+                isSameDay(day, new Date()) ? "w-7 h-7 flex items-center justify-center bg-blue-primary text-white rounded-full" : ""
               }`}>
                 {formattedDate}
               </span>
@@ -132,17 +132,17 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
         <aside className="w-full lg:w-80 shrink-0">
           <div className="bg-white rounded-2xl border border-slate-100 p-6 sticky top-24 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-              <Bell className="text-teal-600" size={20} />
+              <Bell className="text-blue-600" size={20} />
               {format(selectedDate, 'M월 d일')} 일정
             </h3>
             
             {selectedDayPolicies.length > 0 ? (
               <div className="space-y-4">
                 {selectedDayPolicies.map(p => (
-                  <div key={p.scheduleId} className="p-4 rounded-xl bg-teal-50 border border-teal-100 group">
+                  <div key={p.scheduleId} className="p-4 rounded-xl bg-blue-50 border border-blue-100 group">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-0.5 rounded bg-teal-600 text-white text-[10px] font-bold">마감</span>
-                      <span className="text-xs font-bold text-teal-700">청년정책</span>
+                      <span className="px-2 py-0.5 rounded bg-blue-primary text-white text-[10px] font-bold">마감</span>
+                      <span className="text-xs font-bold text-blue-700">청년정책</span>
                     </div>
                     <h4 className="text-sm font-bold text-slate-800 mb-2">{p.policyTitle}</h4>
                     <div className="flex items-center gap-2 text-[11px] text-slate-500">
@@ -169,7 +169,7 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
                     {bookmarkedPolicies.length > 0 ? (
                         bookmarkedPolicies.map(p => (
                             <div key={p.id} className="flex items-center gap-3">
-                                <div className="w-2 h-2 rounded-full bg-teal-400"></div>
+                                <div className="w-2 h-2 rounded-full bg-blue-400"></div>
                                 <span className="text-xs text-slate-600 truncate">{p.title}</span>
                                 <span className="text-[10px] text-slate-400 ml-auto whitespace-nowrap">
                                   {p.endDate ? format(parseISO(p.endDate), 'MM.dd') : '기한없음'}

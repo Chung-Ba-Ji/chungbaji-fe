@@ -22,7 +22,7 @@ const Community = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-slate-800">청년 커뮤니티</h2>
-          <button className="bg-teal-600 text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
+          <button className="bg-blue-primary text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2">
             <Plus size={20} /> 글쓰기
           </button>
         </div>

@@ -18,7 +18,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
     <div className="w-full max-w-md mx-auto">
       <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-teal-600/20">
+          <div className="w-16 h-16 bg-blue-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/20">
             <span className="text-white font-bold text-3xl">Y</span>
           </div>
           <h2 className="text-2xl font-bold text-slate-800">
@@ -38,7 +38,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
                 <input 
                   type="text" 
                   placeholder="실명을 입력해주세요"
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                   required
                 />
               </div>
@@ -52,7 +52,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
               <input 
                 type="email" 
                 placeholder="example@email.com"
-                className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
+                className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                 required
               />
             </div>
@@ -65,7 +65,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
               <input 
                 type={showPassword ? "text" : "password"} 
                 placeholder="••••••••"
-                className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all"
+                className="w-full pl-11 pr-12 py-3 rounded-xl bg-slate-50 border border-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:bg-white transition-all"
                 required
               />
               <button 
@@ -89,7 +89,7 @@ const Auth = ({ mode = 'login', onToggleMode, onLoginSuccess }) => {
           <button 
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 bg-blue-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-teal-600/20 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
+            className="w-full py-4 bg-blue-primary text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 mt-4 disabled:opacity-70"
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

@@ -51,12 +51,12 @@ const Hero = ({ onFindPolicyClick }) => {
             >
               <button 
                 onClick={onFindPolicyClick}
-                className="w-full sm:w-auto px-8 py-4 bg-blue-primary text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-teal-600/20 flex items-center justify-center gap-2 text-lg"
+                className="w-full sm:w-auto px-8 py-4 bg-blue-primary text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 flex items-center justify-center gap-2 text-lg"
               >
                 정책 맞춤 추천받기
                 <ChevronRight size={20} />
               </button>
-              <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-teal-200 hover:text-blue-600 transition-all flex items-center justify-center gap-2 text-lg">
+              <button className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-bold rounded-2xl border border-slate-200 hover:border-blue-200 hover:text-blue-600 transition-all flex items-center justify-center gap-2 text-lg">
                 인기 커뮤니티 보기
               </button>
             </Motion.div>

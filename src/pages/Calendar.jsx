@@ -139,7 +139,7 @@ const CalendarView = ({ bookmarkedPolicies = [] }) => { // 기본값 빈 배열 
             {selectedDayPolicies.length > 0 ? (
               <div className="space-y-4">
                 {selectedDayPolicies.map(p => (
-                  <div key={p.scheduleId} className="p-4 rounded-xl bg-blue-50 border border-teal-100 group">
+                  <div key={p.scheduleId} className="p-4 rounded-xl bg-blue-50 border border-blue-100 group">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="px-2 py-0.5 rounded bg-blue-primary text-white text-[10px] font-bold">마감</span>
                       <span className="text-xs font-bold text-blue-700">청년정책</span>

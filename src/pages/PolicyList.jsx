@@ -652,7 +652,6 @@ import { Search, Bookmark, ChevronDown, ChevronRight, MapPin, Calendar, RotateCc
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import styled from "styled-components";
 
-// API 연동용 (서버 연결 안될 때를 대비해 try-catch 처리)
 // import { fetchSearchPolicies, fetchRecommendPolicies } from "../api/policy"; 
 
 /* ==============================
@@ -697,7 +696,7 @@ const MOCK_DATA = [
 const statusClass = { "접수중": "status-open", "마감": "status-close" };
 
 export default function PolicyList({ bookmarks = [], toggleBookmark }) {
-  const [policies, setPolicies] = useState(MOCK_DATA); // 초기값에 목데이터를 넣어줘야 화면에 뜸!
+  const [policies, setPolicies] = useState(MOCK_DATA); // 초기값에 목데이터를 넣어줘야 화면에 뜬다
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({

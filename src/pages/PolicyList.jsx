@@ -647,13 +647,16 @@
 
 
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Search, Bookmark, ChevronDown, ChevronRight, MapPin, Calendar, RotateCcw, UserCheck, Filter } from "lucide-react";
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import styled from "styled-components";
 
+// API 연동용 (서버 연결 안될 때를 대비해 try-catch 처리)
+// import { fetchSearchPolicies, fetchRecommendPolicies } from "../api/policy"; 
+
 /* ==============================
-    필터 옵션 데이터 (DB 공통코드 기반)
+    필터 옵션 데이터
 ============================== */
 const FILTER_DATA = {
   jobCd: [
@@ -669,88 +672,61 @@ const FILTER_DATA = {
     { id: "0011001", label: "인문계열" }, { id: "0011002", label: "사회계열" },
     { id: "0011005", label: "공학계열" }, { id: "0011009", label: "제한없음" }
   ],
-  earnCndSeCd: [
-    { id: "0043001", label: "무관" }, { id: "0043002", label: "연소득" }, { id: "0043003", label: "기타" }
-  ],
-  sbizCd: [
-    { id: "0014001", label: "중소기업" }, { id: "0014002", label: "여성" },
-    { id: "0014008", label: "지역인재" }, { id: "0014010", label: "제한없음" }
-  ],
-  region: ["전국", "서울특별시", "경기도", "부산광역시", "대구광역시"]
+  region: [
+    { id: "11000", label: "서울특별시" }, { id: "41000", label: "경기도" },
+    { id: "26000", label: "부산광역시" }, { id: "27000", label: "대구광역시" }
+  ]
 };
 
-// 테스트용 목데이터 (DB 스키마 필드명 반영)
-const MOCK_POLICIES = {
-  items: [
-    {
-      policyId: 1,
-      title: "청년 월세 특별지원",
-      category: "주거",
-      regionName: "서울특별시",
-      applyEndDate: "2026-12-31",
-      isOpen: true,
-      description: "청년들의 주거비 부담 경감을 위해 월세를 최대 20만원까지 지원합니다.",
-      job_code: "0013004", 
-      school_code: "0049005",
-      major_code: "0011001",
-      income_code: "0043002"
-    },
-    {
-      policyId: 2,
-      title: "공학도 혁신 취업 장려금",
-      category: "취업",
-      regionName: "경기도",
-      applyEndDate: "2026-11-15",
-      isOpen: true,
-      description: "공학 계열 전공자를 위한 맞춤형 취업 장려금 지원 사업입니다.",
-      job_code: "0013003",
-      school_code: "0049007",
-      major_code: "0011005",
-      income_code: "0043001"
-    }
-  ],
-  total: 123
-};
+/* ==============================
+    리얼 목데이터 (10개)
+============================== */
+const MOCK_DATA = [
+  { policyId: 1, title: "청년 월세 특별지원", category: "주거", regionName: "서울특별시", regionCode: "11000", applyEndDate: "2026-12-31", isOpen: true, policyDescription: "청년들의 주거비 부담 경감을 위해 월세를 최대 20만원까지 지원합니다.", job_code: "0013003", school_code: "0049005", major_code: "0011009" },
+  { policyId: 2, title: "공학도 혁신 취업 장려금", category: "취업", regionName: "경기도", regionCode: "41000", applyEndDate: "2026-11-15", isOpen: true, policyDescription: "공학 계열 전공자를 채용하는 기업과 청년에게 장려금을 지원합니다.", job_code: "0013001", school_code: "0049007", major_code: "0011005" },
+  { policyId: 3, title: "예술인 창작 지원금", category: "복지", regionName: "서울특별시", regionCode: "11000", applyEndDate: "2026-05-20", isOpen: true, policyDescription: "예체능 전공 미취업 청년들을 위한 창작 활동비를 지원합니다.", job_code: "0013003", school_code: "0049007", major_code: "0011006" },
+  { policyId: 4, title: "창업가 리더십 아카데미", category: "교육", regionName: "전국", regionCode: "00000", applyEndDate: "2026-03-10", isOpen: false, policyDescription: "예비 창업자들을 위한 실전 비즈니스 모델링 교육 프로그램입니다.", job_code: "0013006", school_code: "0049010", major_code: "0011003" },
+  { policyId: 5, title: "지역인재 정착 지원금", category: "금융", regionName: "부산광역시", regionCode: "26000", applyEndDate: "2026-08-30", isOpen: true, policyDescription: "부산 지역 대학 졸업 후 현지 기업에 취업한 청년에게 정착금을 지원합니다.", job_code: "0013001", school_code: "0049007", major_code: "0011009" },
+  { policyId: 6, title: "IT 프리랜서 사회보험료 지원", category: "복지", regionName: "경기도", regionCode: "41000", applyEndDate: "2026-10-12", isOpen: true, policyDescription: "불안정한 소득의 프리랜서들을 위해 사회보험료 일부를 보조합니다.", job_code: "0013004", school_code: "0049010", major_code: "0011005" },
+  { policyId: 7, title: "인문학 청년 강사 양성", category: "교육", regionName: "서울특별시", regionCode: "11000", applyEndDate: "2026-04-01", isOpen: true, policyDescription: "인문/사회계열 석박사 학위 소지자를 강사로 매칭해 드립니다.", job_code: "0013003", school_code: "0049008", major_code: "0011001" },
+  { policyId: 8, title: "여성 기술창업 디딤돌", category: "취업", regionName: "전국", regionCode: "00000", applyEndDate: "2026-07-22", isOpen: true, policyDescription: "이공계 여성 청년들의 기술 창업 아이템 사업화를 돕습니다.", job_code: "0013006", school_code: "0049005", major_code: "0011004" },
+  { policyId: 9, title: "중소기업 재직자 저축 장려금", category: "금융", regionName: "대구광역시", regionCode: "27000", applyEndDate: "2026-09-15", isOpen: true, policyDescription: "대구 소재 중소기업 재직자의 자산 형성을 위한 매칭 저축입니다.", job_code: "0013001", school_code: "0049010", major_code: "0011009" },
+  { policyId: 10, title: "사회과학 데이터 분석가 캠프", category: "교육", regionName: "서울특별시", regionCode: "11000", applyEndDate: "2026-02-28", isOpen: true, policyDescription: "사회과학 전공자들을 위한 데이터 분석 역량 강화 교육입니다.", job_code: "0013003", school_code: "0049007", major_code: "0011002" },
+];
 
-const statusClass = {
-  "접수중": "status-open",
-  "마감임박": "status-soon",
-  "마감": "status-close"
-};
+const statusClass = { "접수중": "status-open", "마감": "status-close" };
 
 export default function PolicyList({ bookmarks = [], toggleBookmark }) {
+  const [policies, setPolicies] = useState(MOCK_DATA); // 초기값에 목데이터를 넣어줘야 화면에 뜸!
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({
-    region: "전체",
-    ageDate: "",
-    jobCd: [],
-    schoolCd: [],
-    plcyMajorCd: [],
-    earnCndSeCd: "",
-    sbizCd: [],
+    regionCode: "11000",
+    jobCode: 0,
+    educationCode: 0,
+    majorCode: 0,
   });
 
-  const getStatusLabel = (p) => (p.isOpen ? "접수중" : "마감");
-
-  // 7대 요건 기반 필터링 로직
+  // 필터링 로직 (실제 목데이터 기반 클라이언트 필터링)
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return (MOCK_POLICIES.items || []).filter((p) => {
+    return policies.filter((p) => {
       const passSearch = !q || p.title.toLowerCase().includes(q);
-      const passRegion = filters.region === "전체" || p.regionName === filters.region;
-      const passJob = filters.jobCd.length === 0 || filters.jobCd.includes(p.job_code);
-      const passSchool = filters.schoolCd.length === 0 || filters.schoolCd.includes(p.school_code);
-      const passMajor = filters.plcyMajorCd.length === 0 || filters.plcyMajorCd.includes(p.major_code);
-      const passIncome = !filters.earnCndSeCd || p.income_code === filters.earnCndSeCd;
-
-      return passSearch && passRegion && passJob && passSchool && passMajor && passIncome;
+      const passRegion = filters.regionCode === "00000" || p.regionCode === filters.regionCode || p.regionCode === "00000";
+      const passJob = filters.jobCode === 0 || p.job_code === String(filters.jobCode).padStart(7, '0');
+      const passEdu = filters.educationCode === 0 || p.school_code === String(filters.educationCode).padStart(7, '0');
+      const passMajor = filters.majorCode === 0 || p.major_code === String(filters.majorCode).padStart(7, '0');
+      
+      return passSearch && passRegion && passJob && passEdu && passMajor;
     });
-  }, [search, filters]);
+  }, [search, policies, filters]);
 
   const reset = () => {
-    setFilters({ region: "전체", ageDate: "", jobCd: [], schoolCd: [], plcyMajorCd: [], earnCndSeCd: "", sbizCd: [] });
+    setFilters({ regionCode: "11000", jobCode: 0, educationCode: 0, majorCode: 0 });
     setSearch("");
   };
+
+  const getStatusLabel = (p) => (p.isOpen ? "접수중" : "마감");
 
   return (
     <PolicyWrap>
@@ -764,7 +740,7 @@ export default function PolicyList({ bookmarks = [], toggleBookmark }) {
           <div className="search-box">
             <Search size={18} className="search-icon" />
             <input 
-              placeholder="정책명 또는 키워드로 검색해보세요" 
+              placeholder="정책명 검색..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -780,12 +756,11 @@ export default function PolicyList({ bookmarks = [], toggleBookmark }) {
 
             <div className="filter-group">
               <div className="group-label"><UserCheck size={14} /> 필수 요건</div>
-              
               <div className="item-box">
                 <label>지역</label>
-                <select value={filters.region} onChange={(e) => setFilters(p => ({ ...p, region: e.target.value }))}>
-                  <option value="전체">전체 지역</option>
-                  {FILTER_DATA.region.map(r => <option key={r} value={r}>{r}</option>)}
+                <select value={filters.regionCode} onChange={(e) => setFilters(p => ({ ...p, regionCode: e.target.value }))}>
+                  <option value="00000">전국</option>
+                  {FILTER_DATA.region.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}
                 </select>
               </div>
 
@@ -793,98 +768,51 @@ export default function PolicyList({ bookmarks = [], toggleBookmark }) {
                 <label>취업 상태</label>
                 <div className="chip-group">
                   {FILTER_DATA.jobCd.map(j => (
-                    <button 
-                      key={j.id}
-                      className={`chip ${filters.jobCd.includes(j.id) ? "active" : ""}`}
-                      onClick={() => setFilters(p => ({
-                        ...p, jobCd: p.jobCd.includes(j.id) ? p.jobCd.filter(id => id !== j.id) : [...p.jobCd, j.id]
-                      }))}
+                    <button key={j.id} className={`chip ${filters.jobCode === parseInt(j.id) ? "active" : ""}`}
+                      onClick={() => setFilters(p => ({ ...p, jobCode: parseInt(j.id) }))}
                     >{j.label}</button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="item-box">
-                <label>학력 상태</label>
-                <div className="chip-group">
-                  {FILTER_DATA.schoolCd.map(s => (
-                    <button 
-                      key={s.id}
-                      className={`chip ${filters.schoolCd.includes(s.id) ? "active" : ""}`}
-                      onClick={() => setFilters(p => ({
-                        ...p, schoolCd: p.schoolCd.includes(s.id) ? p.schoolCd.filter(id => id !== s.id) : [...p.schoolCd, s.id]
-                      }))}
-                    >{s.label}</button>
                   ))}
                 </div>
               </div>
             </div>
 
             <div className="filter-group optional">
-              <div className="group-label">추가 선택</div>
-              <div className="item-box">
-                <label>전공분야</label>
-                <div className="chip-group">
-                  {FILTER_DATA.plcyMajorCd.map(m => (
-                    <button 
-                      key={m.id}
-                      className={`chip ${filters.plcyMajorCd.includes(m.id) ? "active" : ""}`}
-                      onClick={() => setFilters(p => ({
-                        ...p, plcyMajorCd: p.plcyMajorCd.includes(m.id) ? p.plcyMajorCd.filter(id => id !== m.id) : [...p.plcyMajorCd, m.id]
-                      }))}
-                    >{m.label}</button>
-                  ))}
-                </div>
+              <div className="group-label">전공분야</div>
+              <div className="chip-group">
+                {FILTER_DATA.plcyMajorCd.map(m => (
+                  <button key={m.id} className={`chip ${filters.majorCode === parseInt(m.id) ? "active" : ""}`}
+                    onClick={() => setFilters(p => ({ ...p, majorCode: parseInt(m.id) }))}
+                  >{m.label}</button>
+                ))}
               </div>
             </div>
           </aside>
 
           <section className="cards">
-            {filtered.length > 0 ? (
-              filtered.map((p) => {
-                const status = getStatusLabel(p);
-                const isBookmarked = bookmarks.includes(p.policyId);
-
-                return (
-                  <Motion.div key={p.policyId} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div className="card">
-                      <div>
-                        <div className="card-top">
-                          <span className={`status tag-status ${statusClass[status] || ""}`}>
-                            {status}
-                          </span>
-                          <span className="category tag-catList">{p.category}</span>
-
-                          <button
-                            type="button"
-                            className={`bookmark-btn ${isBookmarked ? "active" : ""}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleBookmark?.(p.policyId);
-                            }}
-                          >
-                            <Bookmark size={20} fill={isBookmarked ? "#3b82f6" : "none"} color={isBookmarked ? "#3b82f6" : "#cbd5e1"} />
-                          </button>
-                        </div>
-
-                        <div className="card-title">{p.title}</div>
-                        <div className="desc">{p.description}</div>
-                      </div>
-
-                      <div className="meta">
-                        <div><MapPin size={12} /> {p.regionName}</div>
-                        <div><Calendar size={12} /> {p.applyEndDate}</div>
-                        <button className="detail-btn" type="button">
-                          자세히 보기 <ChevronRight size={14} />
-                        </button>
-                      </div>
+            {filtered.map((p) => {
+              const status = getStatusLabel(p);
+              const isBookmarked = bookmarks.includes(p.policyId);
+              return (
+                <Motion.div key={p.policyId} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div className="card">
+                    <div className="card-top">
+                      <span className={`status tag-status ${statusClass[status]}`}>{status}</span>
+                      <span className="category tag-catList">{p.category}</span>
+                      <button className={`bookmark-btn ${isBookmarked ? "active" : ""}`} onClick={() => toggleBookmark(p.policyId)}>
+                        <Bookmark size={20} fill={isBookmarked ? "#3b82f6" : "none"} color={isBookmarked ? "#3b82f6" : "#cbd5e1"} />
+                      </button>
                     </div>
-                  </Motion.div>
-                );
-              })
-            ) : (
-              <div className="empty-msg">조건에 맞는 정책이 없습니다.</div>
-            )}
+                    <div className="card-title">{p.title}</div>
+                    <p className="desc">{p.policyDescription}</p>
+                    <div className="meta">
+                      <div><MapPin size={12} /> {p.regionName}</div>
+                      <div><Calendar size={12} /> {p.applyEndDate}</div>
+                      <button className="detail-btn">자세히 보기 <ChevronRight size={14} /></button>
+                    </div>
+                  </div>
+                </Motion.div>
+              );
+            })}
           </section>
         </div>
       </div>
@@ -897,22 +825,23 @@ const PolicyWrap = styled.div`
   .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
   .page-header { margin-bottom: 40px; h1 { font-size: 28px; font-weight: 800; color: #1e293b; } .sub { color: #64748b; margin-top: 8px; } }
   .search-wrap { background: #fff; padding: 40px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 40px; display: flex; justify-content: center; }
-  .search-box { width: 100%; max-width: 600px; position: relative; input { width: 100%; padding: 16px 50px; border-radius: 16px; border: 1px solid #e2e8f0; font-size: 16px; &:focus { border-color: #3b82f6; outline: none; } } .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; } }
+  .search-box { width: 100%; max-width: 600px; position: relative; input { width: 100%; padding: 16px 50px; border-radius: 16px; border: 1px solid #e2e8f0; font-size: 16px; &:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); } } .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #94a3b8; } }
   .layout { display: grid; grid-template-columns: 320px 1fr; gap: 40px; }
   .sidebar { background: #fff; border-radius: 20px; border: 1px solid #e2e8f0; height: fit-content; position: sticky; top: 20px; }
   .sidebar-title { padding: 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; } .reset-btn { background: none; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 13px; } }
   .filter-group { padding: 24px; border-bottom: 1px solid #f1f5f9; &.optional { background: #fcfdfe; } .group-label { font-size: 13px; font-weight: 700; color: #3b82f6; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; } }
   .item-box { margin-bottom: 24px; label { display: block; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 12px; } select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #e2e8f0; } }
   .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { padding: 8px 14px; border-radius: 10px; border: 1px solid #f1f5f9; background: #f8fafc; font-size: 13px; cursor: pointer; &.active { background: #3b82f6; color: #fff; font-weight: 600; } }
+  .chip { padding: 8px 14px; border-radius: 10px; border: 1px solid #f1f5f9; background: #f8fafc; font-size: 13px; color: #64748b; cursor: pointer; &.active { background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600; } }
   .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
   .card { background: #fff; border-radius: 20px; padding: 24px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s; &:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); } }
   .card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; .bookmark-btn { margin-left: auto; background: none; border: none; cursor: pointer; } }
   .card-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #1e293b; }
-  .desc { font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.5; height: 3em; overflow: hidden; }
+  .desc { font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.5; height: 3em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .meta { display: flex; gap: 16px; font-size: 12px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 16px; align-items: center; .detail-btn { margin-left: auto; background: none; border: none; color: #3b82f6; font-weight: 600; cursor: pointer; display: flex; align-items: center; } }
   .tag-status { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
   .status-open { background: #ecfdf5; color: #059669; }
+  .status-close { background: #f1f5f9; color: #64748b; }
   .tag-catList { padding: 4px 10px; border-radius: 20px; background: #f1f5f9; color: #64748b; font-size: 12px; }
   .empty-msg { text-align: center; padding: 100px 0; color: #94a3b8; grid-column: 1/-1; }
 `;
